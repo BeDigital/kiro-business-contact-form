@@ -1,0 +1,16 @@
+{
+  "ContactSubmissionsTable": [
+    {
+      "id": "sample-id-1",
+      "timestamp": "2025-07-22T10:00:00Z",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "555-123-4567",
+      "company": "Example Corp",
+      "message": "This is a sample message for testing.",
+      "status": "new",
+      "ipAddress": "127.0.0.1",
+      "userAgent": "Mozilla/5.0"
+    }
+  ]
+}

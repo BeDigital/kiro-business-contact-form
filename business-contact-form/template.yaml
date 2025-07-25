@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Business Contact Form
+  SAM Template for the Thunk-it.com business contact form
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        ADMIN_EMAIL: admin@thunk-it.com
+        SUBMISSIONS_TABLE: !Ref ContactSubmissionsTable
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: thunk-it.com
+    Description: Domain name for the website
+
+Resources:
+  # API Gateway
+  ContactFormApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'POST, GET, OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+
+  # Lambda Functions
+  FormSubmissionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/form-submission/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ContactSubmissionsTable
+        - SESCrudPolicy:
+            IdentityName: !Ref DomainName
+      Events:
+        SubmitForm:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContactFormApi
+            Path: /contact
+            Method: post
+
+  AdminGetSubmissionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/admin-get-submissions/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ContactSubmissionsTable
+      Events:
+        GetSubmissions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContactFormApi
+            Path: /submissions
+            Method: get
+            Auth:
+              ApiKeyRequired: true
+
+  AdminUpdateSubmissionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/admin-update-submission/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ContactSubmissionsTable
+      Events:
+        UpdateSubmission:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContactFormApi
+            Path: /submissions/{id}
+            Method: put
+            Auth:
+              ApiKeyRequired: true
+
+  # DynamoDB Table
+  ContactSubmissionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ContactSubmissions
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+
+  # S3 Bucket for Website
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  # CloudFront Distribution
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            Id: S3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+        Enabled: true
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+        PriceClass: PriceClass_100
+
+  # CloudFront Origin Access Identity
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub "OAI for ${DomainName}"
+
+  # S3 Bucket Policy
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Sub "${WebsiteBucket.Arn}/*"
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+
+Outputs:
+  ContactFormApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ContactFormApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  FormSubmissionFunction:
+    Description: "Form Submission Lambda Function ARN"
+    Value: !GetAtt FormSubmissionFunction.Arn
+  WebsiteBucketName:
+    Description: "S3 bucket for website content"
+    Value: !Ref WebsiteBucket
+  CloudFrontDistributionDomainName:
+    Description: "CloudFront Distribution Domain Name"
+    Value: !GetAtt CloudFrontDistribution.DomainName

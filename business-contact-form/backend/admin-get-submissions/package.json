@@ -1,0 +1,12 @@
+{
+  "name": "admin-get-submissions",
+  "version": "1.0.0",
+  "description": "Lambda function for retrieving contact form submissions",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1048.0"
+  }
+}
