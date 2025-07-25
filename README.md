@@ -82,7 +82,7 @@ Each requirement was translated into discrete, traceable tasks:
 | **Tech stack clarification** | “Can I use Terraform instead of CDK?” |
 | **Cost emphasis** | “Please choose the most cost-effective solution…” |
 | **Local dev context** | “Can I test this locally on Mac OSX 15.5?” |
-| **Deployment clarity** | “Deploy to my AWS account '052384102251' and profile 'devops'” |
+| **Deployment clarity** | “Deploy to my AWS environment” |
 | **Documentation requests** | “Can you include a complete README?” |
 
 ### Sample Prompt Templates:
