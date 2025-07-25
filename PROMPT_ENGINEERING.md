@@ -87,7 +87,7 @@ These iterative refinements helped shape the solution to better meet specific ne
 ### 3. Specific Technical Requirements
 
 Including specific technical details in prompts:
-- Mentioning AWS account ID and profile: "let's deploy this to my AWS account '052384102251' and profile 'devops'"
+- Mentioning AWS account ID and profile: "let's deploy this to my AWS account '00000000000' and profile 'devops'"
 - Specifying operating system version: "Macintosh OSX 15.5"
 
 ### 4. Asking for Documentation
