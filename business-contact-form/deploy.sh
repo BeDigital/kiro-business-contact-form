@@ -5,10 +5,10 @@ set -e
 
 # Configuration
 AWS_PROFILE="devops"
-AWS_ACCOUNT_ID="052384102251"
+AWS_ACCOUNT_ID="your-account-number"
 AWS_REGION="us-east-1"
 STACK_NAME="business-contact-form"
-DOMAIN_NAME="thunk-it.com"
+DOMAIN_NAME="your-domain-name"
 
 echo "Deploying Business Contact Form to AWS account $AWS_ACCOUNT_ID using profile $AWS_PROFILE"
 
