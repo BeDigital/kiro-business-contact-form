@@ -4,7 +4,7 @@
 set -e
 
 # Configuration
-AWS_PROFILE="devops"
+AWS_PROFILE="your-profile-default"
 AWS_ACCOUNT_ID="your-account-number"
 AWS_REGION="us-east-1"
 STACK_NAME="business-contact-form"
