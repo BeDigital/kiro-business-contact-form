@@ -44,11 +44,18 @@ const updateSubmission = async (id, timestamp, updates) => {
     ExpressionAttributeValues: {
       ':status': updates.status
     },
+    ConditionExpression: 'attribute_exists(id) AND attribute_exists(timestamp)',
     ReturnValues: 'ALL_NEW'
   };
-  
-  const result = await dynamodb.update(params).promise();
-  return result.Attributes;
+  try {
+    const result = await dynamodb.update(params).promise();
+    return result.Attributes;
+  } catch (error) {
+    if (error.code === 'ConditionalCheckFailedException') {
+      throw new Error('Submission not found');
+    }
+    throw error;
+  }
 };
 
 /**
@@ -96,8 +103,14 @@ exports.lambdaHandler = async (event, context) => {
     console.error('Error updating submission:', error);
     
     // Return error response
+    let statusCode = 500;
+    if (error.message.includes('required') || error.message.includes('Invalid')) {
+      statusCode = 400;
+    } else if (error.message.includes('not found')) {
+      statusCode = 404;
+    }
     return {
-      statusCode: error.message.includes('required') || error.message.includes('Invalid') ? 400 : 500,
+      statusCode,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
