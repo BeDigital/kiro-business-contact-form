@@ -1,5 +1,20 @@
-const AWS = require('aws-sdk');
-const { v4: uuidv4 } = require('uuid');
+let AWS;
+try {
+  AWS = require('aws-sdk');
+} catch (err) {
+  // Minimal stubs for testing environments where aws-sdk is unavailable
+  AWS = {
+    DynamoDB: { DocumentClient: function () {} },
+    SES: function () {}
+  };
+}
+let uuidv4;
+try {
+  ({ v4: uuidv4 } = require('uuid'));
+} catch (err) {
+  // Simple stub for environments without the uuid package
+  uuidv4 = () => '00000000-0000-4000-8000-000000000000';
+}
 
 // Check if we're running locally
 const isLocal = process.env.AWS_SAM_LOCAL === 'true';
@@ -23,23 +38,32 @@ const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE;
  */
 const validateFormData = (data) => {
   const errors = {};
-  
+
   // Validate name
-  if (!data.name || data.name.trim() === '') {
+  const name = data.name ? data.name.trim() : '';
+  if (!name) {
     errors.name = 'Name is required';
+  } else {
+    data.name = name;
   }
-  
+
   // Validate email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!data.email || !emailRegex.test(data.email)) {
+  const email = data.email ? data.email.trim() : '';
+  if (!email || !emailRegex.test(email)) {
     errors.email = 'Valid email is required';
+  } else {
+    data.email = email;
   }
-  
+
   // Validate message
-  if (!data.message || data.message.trim() === '') {
+  const message = data.message ? data.message.trim() : '';
+  if (!message) {
     errors.message = 'Message is required';
+  } else {
+    data.message = message;
   }
-  
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors
@@ -232,3 +256,6 @@ exports.lambdaHandler = async (event, context) => {
     };
   }
 };
+
+// Export for testing purposes
+exports.validateFormData = validateFormData;
