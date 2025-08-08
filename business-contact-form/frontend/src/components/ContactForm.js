@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 import './ContactForm.css';
 
 // This would be replaced with the actual API endpoint from CloudFormation output
@@ -68,7 +69,15 @@ const ContactForm = () => {
     setSubmitStatus(null);
     
     try {
-      const response = await axios.post(API_ENDPOINT, formData);
+      const sanitizedData = {
+        name: DOMPurify.sanitize(formData.name),
+        email: DOMPurify.sanitize(formData.email),
+        phone: DOMPurify.sanitize(formData.phone),
+        company: DOMPurify.sanitize(formData.company),
+        message: DOMPurify.sanitize(formData.message)
+      };
+
+      const response = await axios.post(API_ENDPOINT, sanitizedData);
       
       setSubmitStatus({
         type: 'success',
