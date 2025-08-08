@@ -32,6 +32,23 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE;
 
 /**
+ * Sanitizes user input by stripping HTML tags and escaping special characters
+ * @param {string} input - Raw user input
+ * @returns {string} - Sanitized string safe for storage and emails
+ */
+const sanitizeInput = (input = '') => {
+  return String(input)
+    // Remove HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Escape special characters
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+/**
  * Validates the form submission data
  * @param {Object} data - The form submission data
  * @returns {Object} - Validation result with isValid and errors
@@ -44,7 +61,7 @@ const validateFormData = (data) => {
   if (!name) {
     errors.name = 'Name is required';
   } else {
-    data.name = name;
+    data.name = sanitizeInput(name);
   }
 
   // Validate email
@@ -53,7 +70,7 @@ const validateFormData = (data) => {
   if (!email || !emailRegex.test(email)) {
     errors.email = 'Valid email is required';
   } else {
-    data.email = email;
+    data.email = sanitizeInput(email);
   }
 
   // Validate message
@@ -61,7 +78,15 @@ const validateFormData = (data) => {
   if (!message) {
     errors.message = 'Message is required';
   } else {
-    data.message = message;
+    data.message = sanitizeInput(message);
+  }
+
+  // Sanitize optional fields
+  if (data.phone) {
+    data.phone = sanitizeInput(data.phone.trim());
+  }
+  if (data.company) {
+    data.company = sanitizeInput(data.company.trim());
   }
 
   return {
