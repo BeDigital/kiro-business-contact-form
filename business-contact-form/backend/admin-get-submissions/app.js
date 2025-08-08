@@ -82,7 +82,7 @@ exports.lambdaHandler = async (event, context) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': 'https://thunk-it.com'
       },
       body: JSON.stringify(result)
     };
@@ -94,7 +94,7 @@ exports.lambdaHandler = async (event, context) => {
       statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': 'https://thunk-it.com'
       },
       body: JSON.stringify({
         message: 'Internal server error'

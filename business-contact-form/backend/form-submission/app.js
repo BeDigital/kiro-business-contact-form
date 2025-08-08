@@ -213,7 +213,7 @@ exports.lambdaHandler = async (event, context) => {
         statusCode: 400,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Access-Control-Allow-Origin': 'https://thunk-it.com'
         },
         body: JSON.stringify({
           message: 'Validation failed',
@@ -233,7 +233,7 @@ exports.lambdaHandler = async (event, context) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': 'https://thunk-it.com'
       },
       body: JSON.stringify({
         message: 'Form submission successful',
@@ -248,7 +248,7 @@ exports.lambdaHandler = async (event, context) => {
       statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': 'https://thunk-it.com'
       },
       body: JSON.stringify({
         message: 'Internal server error'

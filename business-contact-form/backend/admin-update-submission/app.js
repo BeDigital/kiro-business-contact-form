@@ -69,7 +69,7 @@ exports.lambdaHandler = async (event, context) => {
         statusCode: 400,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Access-Control-Allow-Origin': 'https://thunk-it.com'
         },
         body: JSON.stringify({
           message: 'Timestamp query parameter is required'
@@ -85,7 +85,7 @@ exports.lambdaHandler = async (event, context) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': 'https://thunk-it.com'
       },
       body: JSON.stringify({
         message: 'Submission updated successfully',
@@ -100,7 +100,7 @@ exports.lambdaHandler = async (event, context) => {
       statusCode: error.message.includes('required') || error.message.includes('Invalid') ? 400 : 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': 'https://thunk-it.com'
       },
       body: JSON.stringify({
         message: error.message || 'Internal server error'
